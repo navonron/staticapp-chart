@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-app
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-app
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-app
+    spec:
+      imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 10 }}
+      containers:
+      - name: {{ .Release.Name }}-app
+        image: caddy:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+          - name: site
+            mountPath: /var/www/html
+          - name: caddy-config
+            mountPath: /etc/caddy/Caddyfile
+            subPath: Caddyfile
+      initContainers:
+      - name: init-container
+        image: alpine:latest
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          apk update && apk add wget unzip -y
+          mkdir -p /tmp/site
+          cd /tmp/site
+          token=$(echo -n "$token" | base64)
+          echo "$token"
+          env
+          wget --header="Authorization: Basic $token" "$artifact_url" -O site.zip
+          unzip site.zip
+          mv -n site/* /var/www/html/
+          rm -rf /tmp/site
+        env:
+        - name: HTTP_PROXY
+          value: {{ .Values.proxy.http }}
+        - name: HTTPS_PROXY
+          value: {{ .Values.proxy.https }}
+        - name: token
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-access-token
+              key: token
+        - name: artifact_url
+          value: {{ .Values.artifact.url }}
+        volumeMounts:
+          - name: site
+            mountPath: /var/www/html
+      volumes:
+      - name: site
+        emptyDir: {}
+      - name: caddy-config
+        configMap:
+          name: {{ .Release.Name }}-app

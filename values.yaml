@@ -1,0 +1,33 @@
+## @section site parameters
+##
+## @param site.url static site url
+##
+site:
+  url: ""
+
+## @section site artifact parameters
+##
+## @param artifact.token auth token to get the artifact published by artifact-pipeline
+## @param artifact.url url to the artifact published by artifact-pipeline
+##
+artifact:
+  token: ""
+  url: ""
+
+## @section proxy parameters
+##
+## @param proxy.http set proxy connection
+## @param proxy.https set proxy connection
+##
+proxy:
+  http: http://proxy-chain.intel.com:912
+  https: http://proxy-chain.intel.com:912
+
+## @section imagePullSecrets parameters
+##
+## @param imagePullSecrets[0].name image pull secrets to dockerhub repo
+## @param imagePullSecrets[1].name image pull secrets to harbor repo
+##
+imagePullSecrets:
+  - name: dockerhub-repo
+  - name: harbor-repo
