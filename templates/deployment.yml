@@ -33,28 +33,20 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
         - |
-          apk update && apk add wget unzip -y
-          mkdir -p /tmp/site
-          cd /tmp/site
-          token=$(echo -n "$token" | base64)
-          echo "$token"
-          env
-          wget --header="Authorization: Basic $token" "$artifact_url" -O site.zip
+          echo $token
+          wget --header="Authorization: Basic {{ .Values.artifact.token }}" "{{ .Values.artifact.url }}" -O site.zip
           unzip site.zip
           mv -n site/* /var/www/html/
-          rm -rf /tmp/site
         env:
-        - name: HTTP_PROXY
-          value: {{ .Values.proxy.http }}
-        - name: HTTPS_PROXY
-          value: {{ .Values.proxy.https }}
         - name: token
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-access-token
               key: token
-        - name: artifact_url
-          value: {{ .Values.artifact.url }}
+        - name: HTTP_PROXY
+          value: {{ .Values.proxy.http }}
+        - name: HTTPS_PROXY
+          value: {{ .Values.proxy.https }}
         volumeMounts:
           - name: site
             mountPath: /var/www/html
