@@ -23,7 +23,6 @@ used together to expose the static web site.
 - kubectl installed and configured
 
 
-
 ## Installation
 helm repo add static-app https://ger-is-registry.caas.intel.com/chartrepo/pda
 helm upgrade --install static-app -f values.yaml --namespace <namespace-name>

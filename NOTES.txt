@@ -17,6 +17,7 @@ As part of the deployment, we download the site artifact to the /var/www/html fo
 4   Service & Ingress 
 used together to expose the static web site.
 
+
 ## Parameters
 
 ### site parameters
