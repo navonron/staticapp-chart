@@ -7,6 +7,9 @@ spec:
   replicas: 1
   strategy:
     type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: {{ .Release.Name }}-app
@@ -21,6 +24,10 @@ spec:
         image: caddy:latest
         ports:
         - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
         volumeMounts:
           - name: site
             mountPath: /var/www/html
@@ -33,16 +40,10 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
         - |
-          echo $token
           wget --header="Authorization: Basic {{ .Values.artifact.token }}" "{{ .Values.artifact.url }}" -O site.zip
           unzip site.zip
           mv -n site/* /var/www/html/
         env:
-        - name: token
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-access-token
-              key: token
         - name: HTTP_PROXY
           value: {{ .Values.proxy.http }}
         - name: HTTPS_PROXY
